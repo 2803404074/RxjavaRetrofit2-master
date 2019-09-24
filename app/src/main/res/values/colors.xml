@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="colorPrimary">#3F51B5</color>
+    <color name="colorPrimaryDark">#303F9F</color>
+    <color name="colorBlue01">#5185FF</color>
+    <color name="colorBlue02">#4A18DC</color>
+    <color name="colorZi02">#C066FD</color>
+
+    <color name="colorAccent">#FF4081</color>
+    <color name="colorW">#ffffff</color>
+    <color name="colorGray1">#EFEFEF</color>
+    <color name="colorGray2">#c5c5c5</color>
+    <color name="colorGray4">#ffd2d2d2</color>
+    <color name="colorTouMing">#26ffffff</color>
+    <color name="green01">#24ecbb</color>
+    <color name="green02">#18dadc</color>
+    <color name="colorOr01">#F19149</color>
+    <color name="colorOr02">#EC6941</color>
+    <color name="lsq_color_transparent">#00000000</color>
+</resources>

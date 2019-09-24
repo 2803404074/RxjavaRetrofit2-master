@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:focusableInTouchMode="true"
+    android:descendantFocusability="blocksDescendants"
+    android:fillViewport="true"
+    xmlns:fresco="http://schemas.android.com/apk/res-auto">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/dp_215">
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/dp_180"
+            android:background="@mipmap/user_bg">
+            <com.facebook.drawee.view.SimpleDraweeView
+                android:id="@+id/sdvHead"
+                android:layout_marginTop="@dimen/dp_30"
+                android:layout_centerHorizontal="true"
+                android:layout_width="@dimen/dp_70"
+                android:layout_height="@dimen/dp_70"
+                fresco:roundAsCircle="true" />
+
+            <LinearLayout
+                android:id="@+id/llContent"
+                android:layout_marginTop="@dimen/dp_5"
+                android:layout_below="@+id/sdvHead"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center">
+                <TextView
+                    android:id="@+id/tvNickName"
+                    android:textSize="@dimen/sp_18"
+                    android:layout_centerHorizontal="true"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="昵称"/>
+
+                <TextView
+                    android:layout_toRightOf="@+id/tvNickName"
+                    android:id="@+id/tvRoomNumber"
+                    android:layout_marginLeft="@dimen/dp_5"
+                    android:textSize="@dimen/sp_14"
+                    android:paddingHorizontal="@dimen/dp_5"
+                    android:textColor="@android:color/white"
+                    android:background="@mipmap/room_bg"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="房间号:123456"/>
+            </LinearLayout>
+
+            <TextView
+                android:layout_centerHorizontal="true"
+                android:layout_below="@+id/llContent"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="累计直播12小时|今日直播0分钟"/>
+
+        </RelativeLayout>
+
+        <LinearLayout
+            android:background="@mipmap/home_bg"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="@dimen/dp_40"
+            android:orientation="vertical"
+            android:paddingHorizontal="@dimen/dp_10"
+            android:paddingBottom="@dimen/dp_10"
+            android:layout_alignParentBottom="true">
+            <TextView
+                android:layout_marginVertical="@dimen/dp_10"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="今日任务目标："/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="完成3小时直播"/>
+        </LinearLayout>
+    </RelativeLayout>
+
+        <TextView
+            android:layout_margin="@dimen/dp_10"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="@dimen/sp_15"
+            android:textColor="@android:color/black"
+            android:text="内容发布"/>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/dp_200"
+            android:paddingHorizontal="@dimen/dp_10"
+            android:orientation="horizontal">
+            <LinearLayout
+                android:id="@+id/ll_createLive"
+                android:layout_width="0dp"
+                android:background="@mipmap/create_live_bg"
+                android:layout_height="match_parent"
+                android:orientation="vertical"
+                android:gravity="center"
+                android:layout_weight="1">
+                <ImageView
+                    android:id="@+id/iv_live"
+                    android:layout_gravity="center"
+                    android:layout_width="@dimen/dp_70"
+                    android:layout_height="@dimen/dp_70"
+                    android:src="@mipmap/live_icon"/>
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textColor="@android:color/white"
+                    android:textSize="@dimen/sp_18"
+                    android:layout_marginTop="@dimen/dp_5"
+                    android:text="创建直播"/>
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/ll_createVideo"
+                android:layout_width="0dp"
+                android:layout_marginLeft="@dimen/dp_10"
+                android:background="@mipmap/create_video_bg"
+                android:layout_height="match_parent"
+                android:orientation="vertical"
+                android:gravity="center"
+                android:layout_weight="1">
+                <ImageView
+                    android:id="@+id/iv_video"
+                    android:layout_width="@dimen/dp_70"
+                    android:layout_height="@dimen/dp_70"
+                    android:src="@mipmap/video_icon"/>
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textColor="@android:color/white"
+                    android:textSize="@dimen/sp_18"
+                    android:layout_marginTop="@dimen/dp_5"
+                    android:text="创建视频"/>
+            </LinearLayout>
+        </LinearLayout>
+
+        <TextView
+            android:layout_margin="@dimen/dp_10"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="@dimen/sp_15"
+            android:textColor="@android:color/black"
+            android:text="我的预告"/>
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/recycle_notice"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
+
+
+    </LinearLayout>
+</androidx.core.widget.NestedScrollView>

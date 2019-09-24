@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:fresco="http://schemas.android.com/apk/res-auto"
+    android:background="@color/colorGray1">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <RelativeLayout
+            android:background="@android:color/white"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/dp_215">
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/dp_180"
+                android:background="@mipmap/user_bg">
+                <com.facebook.drawee.view.SimpleDraweeView
+                    android:id="@+id/sdvHead"
+                    android:layout_marginTop="@dimen/dp_30"
+                    android:layout_centerHorizontal="true"
+                    android:layout_width="@dimen/dp_70"
+                    android:layout_height="@dimen/dp_70"
+                    fresco:roundAsCircle="true" />
+
+                <LinearLayout
+                    android:id="@+id/llContent"
+                    android:layout_marginTop="@dimen/dp_5"
+                    android:layout_below="@+id/sdvHead"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center">
+                    <TextView
+                        android:id="@+id/tvNickName"
+                        android:textSize="@dimen/sp_18"
+                        android:layout_centerHorizontal="true"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="昵称"/>
+
+                    <TextView
+                        android:layout_toRightOf="@+id/tvNickName"
+                        android:id="@+id/tvRoomNumber"
+                        android:layout_marginLeft="@dimen/dp_5"
+                        android:textSize="@dimen/sp_14"
+                        android:paddingHorizontal="@dimen/dp_5"
+                        android:textColor="@android:color/white"
+                        android:background="@mipmap/room_bg"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="房间号:123456"/>
+                </LinearLayout>
+
+                <TextView
+                    android:layout_centerHorizontal="true"
+                    android:layout_below="@+id/llContent"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="累计直播12小时|今日直播0分钟"/>
+
+            </RelativeLayout>
+
+            <LinearLayout
+                android:background="@mipmap/home_bg"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="@dimen/dp_40"
+                android:orientation="vertical"
+                android:paddingHorizontal="@dimen/dp_10"
+                android:paddingBottom="@dimen/dp_10"
+                android:layout_alignParentBottom="true">
+                <TextView
+                    android:layout_marginVertical="@dimen/dp_10"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="今日任务目标："/>
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="完成3小时直播"/>
+            </LinearLayout>
+        </RelativeLayout>
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/recycle_my"
+            android:background="@android:color/white"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
+    </LinearLayout>
+</androidx.core.widget.NestedScrollView>

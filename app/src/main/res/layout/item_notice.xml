@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:roundiv="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/container"
+    android:layout_marginVertical="@dimen/dp_5"
+    android:layout_width="match_parent"
+    android:layout_height="@dimen/dp_120"
+    android:background="@drawable/shape_white"
+    tools:context=".activity.MainActivity">
+
+    <com.dabangvr.live.view.MyImageView
+        android:id="@+id/iv_content"
+        android:layout_width="@dimen/dp_100"
+        android:layout_height="match_parent"
+        android:scaleType="fitXY"
+        roundiv:radius="@dimen/dp_8"
+        android:src="@mipmap/test"/>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:paddingHorizontal="@dimen/dp_5"
+        android:layout_toRightOf="@+id/iv_content">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:text="标题：我是小仙女？？"
+            android:textSize="@dimen/sp_18"/>
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:text="简介：欢迎来到小仙女的直播间"
+            android:textSize="@dimen/sp_16"/>
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:text="预约时间：2019/9/30明天"
+            android:textSize="@dimen/sp_18"/>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="距开播还有x小时"
+                android:textColor="@color/colorAccent"
+                android:textSize="@dimen/sp_15"/>
+            <View
+                android:layout_width="0dp"
+                android:layout_height="1px"
+                android:layout_weight="1"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@drawable/shape_yjbk"
+                android:paddingHorizontal="@dimen/dp_10"
+                android:paddingVertical="@dimen/dp_3"
+                android:layout_marginRight="@dimen/dp_10"
+                android:text="删除"/>
+
+            <TextView
+                android:background="@drawable/shape_or02"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@android:color/white"
+                android:paddingHorizontal="@dimen/dp_10"
+                android:paddingVertical="@dimen/dp_3"
+                android:text="开播"/>
+
+        </LinearLayout>
+    </LinearLayout>
+
+
+</RelativeLayout>

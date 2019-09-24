@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@mipmap/login_bg"
+    tools:context=".activity.LoginActivity">
+    <include layout="@layout/toolbar_centent"/>
+
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="跳跳直播"
+        android:layout_marginTop="@dimen/dp_50"
+        android:textSize="@dimen/sp_30"
+        android:layout_below="@+id/rl_toolbar"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="@dimen/dp_50"
+        android:textColor="@android:color/holo_green_light"/>
+    <LinearLayout
+        android:id="@+id/ll_input"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_centerVertical="true"
+        android:orientation="vertical">
+        <EditText
+            android:id="@+id/etPhone"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="手机号"
+            android:layout_marginHorizontal="@dimen/dp_50"
+            android:paddingVertical="@dimen/dp_3"
+            android:textSize="@dimen/sp_18"
+            android:paddingHorizontal="@dimen/dp_5"
+            android:background="@drawable/shape_yjbk"/>
+
+        <EditText
+            android:id="@+id/etPass"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="密码"
+            android:textSize="@dimen/sp_18"
+            android:layout_marginTop="@dimen/dp_10"
+            android:layout_marginHorizontal="@dimen/dp_50"
+            android:paddingVertical="@dimen/dp_3"
+            android:paddingHorizontal="@dimen/dp_5"
+            android:background="@drawable/shape_yjbk"/>
+
+        <TextView
+            android:id="@+id/tvCodeLogin"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@android:color/white"
+            android:layout_gravity="right"
+            android:padding="@dimen/dp_5"
+            android:textSize="@dimen/sp_12"
+            android:layout_marginTop="@dimen/dp_10"
+            android:layout_marginRight="@dimen/dp_50"
+            android:text="验证码登陆->"/>
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/tvLogin"
+        android:layout_marginTop="@dimen/dp_20"
+        android:layout_centerHorizontal="true"
+        android:layout_marginHorizontal="@dimen/dp_50"
+        android:layout_below="@+id/ll_input"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textSize="@dimen/sp_18"
+        android:gravity="center"
+        android:paddingHorizontal="@dimen/dp_20"
+        android:paddingVertical="@dimen/dp_5"
+        android:background="@drawable/shape_yjtc"
+        android:textColor="@android:color/white"
+        android:text="登 陆"/>
+
+</RelativeLayout>

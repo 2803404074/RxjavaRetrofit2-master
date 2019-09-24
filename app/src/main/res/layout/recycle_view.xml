@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:roundiv="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/container"
+    android:layout_width="match_parent"
+    android:layout_height="@dimen/dp_120"
+    android:background="@drawable/shape_white"
+    tools:context=".activity.MainActivity">
+
+    <TextView
+        android:id="@+id/tv_tips"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="@dimen/sp_18"
+        android:textColor="@color/green01"
+        android:layout_margin="@dimen/dp_5"
+        android:layout_centerHorizontal="true"
+        android:text="请添加所属内容标签，最多可添加5个"/>
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recycle_tag"
+        android:layout_below="@+id/tv_tips"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
+</RelativeLayout>
