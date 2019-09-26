@@ -17,8 +17,18 @@ public abstract class BottomDialogUtil {
     private int LayoutId;
 
     private OnDismissCallBack onDismissCallBack;
+    private OnShowCallBack onShowCallBack;
+
     public interface OnDismissCallBack{
         void onDismiss();
+    }
+
+    public interface OnShowCallBack{
+        void onShow();
+    }
+
+    public void setOnShowCallBack(OnShowCallBack onShowCallBack) {
+        this.onShowCallBack = onShowCallBack;
     }
 
     public void setOnDismissCallBack(OnDismissCallBack onDismissCallBack) {
@@ -35,6 +45,15 @@ public abstract class BottomDialogUtil {
         view = LayoutInflater.from(mContext).inflate(LayoutId, null);
         convert(view);
         height = (int) (Double.valueOf(ScreenUtils.getScreenHeight(mContext)) / h);
+
+        dialog.setOnShowListener(new DialogInterface.OnShowListener() {
+            @Override
+            public void onShow(DialogInterface dialogInterface) {
+                if (onShowCallBack!=null){
+                    onShowCallBack.onShow();
+                }
+            }
+        });
     }
 
     public void show(){
@@ -47,7 +66,25 @@ public abstract class BottomDialogUtil {
         dialog.setOnDismissListener(new DialogInterface.OnDismissListener() {
             @Override
             public void onDismiss(DialogInterface dialogInterface) {
-                onDismissCallBack.onDismiss();
+                if (onDismissCallBack!=null){
+                    onDismissCallBack.onDismiss();
+                }
+            }
+        });
+    }
+
+    public void showAuto(){
+        dialog.contentView(view)
+                .inDuration(200)
+                .outDuration(200)
+                .cancelable(true)
+                .show();
+        dialog.setOnDismissListener(new DialogInterface.OnDismissListener() {
+            @Override
+            public void onDismiss(DialogInterface dialogInterface) {
+                if (onDismissCallBack!=null){
+                    onDismissCallBack.onDismiss();
+                }
             }
         });
     }

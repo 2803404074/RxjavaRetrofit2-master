@@ -87,6 +87,7 @@ public abstract class BaseFragment extends Fragment {
     }
 
     public void goTActivity(final Class T, Map<String,Object> map){
+        if (T == null)return;
         Intent intent = new Intent(getContext(),T);
         if (map!=null){
             for (String key : map.keySet()) {

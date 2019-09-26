@@ -65,8 +65,10 @@ public abstract class DialogUtil {
     }
 
     public boolean isShow(){
-        if (dialog.isShowing()){
-            return true;
+        if (dialog!=null){
+            if (dialog.isShowing()){
+                return true;
+            }
         }
         return false;
     }

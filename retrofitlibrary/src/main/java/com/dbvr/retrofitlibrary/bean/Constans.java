@@ -28,4 +28,10 @@ public class Constans {
     //创建直播
     public final static String GET_QINIU = "/api/config/getUploadConfigToken";
 
+    //直播间礼物列表
+    public final static String GiftList = "api/livegift/getLiveGiftList";
+
+    //环信创建房间
+    public final static String HY_CREATE_ROOM = "api/easemob/createChatRoom";
+
 }

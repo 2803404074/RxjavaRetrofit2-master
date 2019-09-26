@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:roundiv="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/container"
+    android:layout_marginVertical="@dimen/dp_5"
+    android:layout_width="match_parent"
+    android:layout_height="@dimen/dp_40"
+    android:paddingLeft="@dimen/dp_5"
+    android:paddingVertical="@dimen/dp_5"
+    android:background="@android:color/white">
+
+
+    <ImageView
+        android:id="@+id/ivContent"
+        android:layout_width="@dimen/dp_30"
+        android:layout_height="@dimen/dp_30"
+        android:layout_centerVertical="true"
+        android:padding="@dimen/dp_5"
+        />
+
+    <TextView
+        android:id="@+id/tvTitle"
+        android:layout_toRightOf="@+id/ivContent"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerVertical="true"
+        android:textSize="@dimen/sp_15"
+        android:layout_marginLeft="@dimen/dp_5"
+        android:textColor="@android:color/black"
+        android:text="功能"/>
+
+    <ImageView
+        android:id="@+id/ivGo"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:padding="@dimen/dp_5"
+        android:layout_alignParentRight="true"
+        android:src="@mipmap/back_go"/>
+</RelativeLayout>

@@ -1,9 +1,9 @@
 package com.dbvr.retrofitlibrary.service;
+import com.dbvr.baselibrary.model.GiftMo;
 import com.dbvr.baselibrary.model.QiniuUploadFile;
 import com.dbvr.baselibrary.model.StreamMo;
 import com.dbvr.baselibrary.model.TagMo;
 import com.dbvr.baselibrary.model.UserMess;
-import com.dbvr.baselibrary.utils.SPUtils;
 import com.dbvr.retrofitlibrary.bean.Beanx;
 import com.dbvr.retrofitlibrary.bean.Constans;
 import com.dbvr.retrofitlibrary.bean.Demo;
@@ -71,6 +71,14 @@ public interface ApiUrl {
     @POST(Constans.GET_QINIU)
     Observable<BaseResponse<QiniuUploadFile>> getQiNiu();
 
+
+    //获取直播间礼物列表
+    @POST(Constans.GiftList)
+    Observable<BaseResponse<List<GiftMo>>>getGiftList();
+
+    //创建环信房间
+    @POST(Constans.HY_CREATE_ROOM)
+    Observable<BaseResponse<String>> createHyRoom();
 
     /**
      * 有效链接

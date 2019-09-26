@@ -1,7 +1,9 @@
 package com.dabangvr.live.livezb.acitivity;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
+import android.content.pm.ActivityInfo;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.LinearGradient;
@@ -21,28 +23,54 @@ import android.view.KeyEvent;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Chronometer;
+import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
+import android.widget.SeekBar;
 import android.widget.TextView;
-import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bumptech.glide.Glide;
 import com.dabangvr.live.R;
 import com.dabangvr.live.activity.CreateLiveActivity;
 import com.dabangvr.live.activity.LiveFinishActivity;
-import com.dabangvr.live.activity.MainActivity;
 import com.dabangvr.live.base.AppManager;
 import com.dabangvr.live.base.BaseRecyclerHolder;
 import com.dabangvr.live.base.RecyclerAdapter;
 import com.dabangvr.live.livezb.ui.CameraPreviewFrameView;
+import com.dabangvr.live.utils.BottomDialogUtil;
+import com.dabangvr.live.utils.CountDownUtil;
 import com.dabangvr.live.utils.DialogUtil;
+import com.dabangvr.live.utils.PopupWindowUtil;
+import com.dbvr.baselibrary.base.Contents;
+import com.dbvr.baselibrary.model.GiftMo;
+import com.dbvr.baselibrary.model.LiveComment;
 import com.dbvr.baselibrary.model.UserMess;
+import com.dbvr.baselibrary.utils.MyAnimatorUtil;
 import com.dbvr.baselibrary.utils.SPUtils;
 import com.dbvr.baselibrary.utils.ToastUtil;
+import com.dbvr.retrofitlibrary.observer.MyObserver;
+import com.dbvr.retrofitlibrary.utils.RequestUtils;
 import com.facebook.drawee.view.SimpleDraweeView;
-import com.qiniu.pili.droid.streaming.AVCodecType;
+import com.google.gson.Gson;
+import com.hyphenate.EMChatRoomChangeListener;
+import com.hyphenate.EMMessageListener;
+import com.hyphenate.chat.EMClient;
+import com.hyphenate.chat.EMMessage;
+import com.hyphenate.chat.EMTextMessageBody;
+import com.hyphenate.exceptions.HyphenateException;
+import com.qiniu.android.dns.DnsManager;
+import com.qiniu.android.dns.IResolver;
+import com.qiniu.android.dns.NetworkInfo;
+import com.qiniu.android.dns.http.DnspodFree;
+import com.qiniu.android.dns.local.AndroidDnsServer;
+import com.qiniu.android.dns.local.Resolver;
 import com.qiniu.pili.droid.streaming.AudioSourceCallback;
 import com.qiniu.pili.droid.streaming.CameraStreamingSetting;
 import com.qiniu.pili.droid.streaming.MediaStreamingManager;
@@ -51,9 +79,12 @@ import com.qiniu.pili.droid.streaming.StreamingProfile;
 import com.qiniu.pili.droid.streaming.StreamingSessionListener;
 import com.qiniu.pili.droid.streaming.StreamingState;
 import com.qiniu.pili.droid.streaming.StreamingStateChangedListener;
+import com.qiniu.pili.droid.streaming.WatermarkSetting;
 
 import org.apache.commons.lang.StringUtils;
 
+import java.io.IOException;
+import java.net.InetAddress;
 import java.net.URISyntaxException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
@@ -62,13 +93,40 @@ import java.util.List;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
+import yellow5a5.clearscreenhelper.ClearScreenHelper;
+import yellow5a5.clearscreenhelper.IClearEvent;
+import yellow5a5.clearscreenhelper.IClearRootView;
+import static com.qiniu.pili.droid.streaming.AVCodecType.SW_VIDEO_WITH_SW_AUDIO_CODEC;
 
-public class SwcameraStreamingActivity extends Activity
-        implements StreamingStateChangedListener, StreamStatusCallback, AudioSourceCallback, StreamingSessionListener {
-    CameraPreviewFrameView mCameraPreviewSurfaceView;
+public class SwcameraStreamingActivity extends Activity implements
+        StreamingStateChangedListener,
+        StreamStatusCallback,
+        AudioSourceCallback,
+        StreamingSessionListener {
+
+    @BindView(R.id.cameraPreview_surfaceView)
+    CameraPreviewFrameView cameraPreviewFrameView;
+
+    //清屏
+    @BindView(R.id.RelativeRootView)
+    IClearRootView mClearRootLayout;
+    private ClearScreenHelper mClearScreenHelper;
+
+    //需要清屏的控件
+    @BindView(R.id.rl_bottom)
+    RelativeLayout rlBottom;
+    @BindView(R.id.llConDown)
+    LinearLayout llConDown;
+
+    //private CameraPreviewFrameView mCameraPreviewSurfaceView;
     private MediaStreamingManager mMediaStreamingManager;
     private StreamingProfile mProfile;
     private String TAG = "StreamingByCameraActivity";
+
+    //更新评论内容，handle
+    private final int handleMessRequestCode = 100;
+
+    private Context mContext;
 
     @BindView(R.id.ll_notice)
     LinearLayout llNotice;//预览提示
@@ -81,6 +139,10 @@ public class SwcameraStreamingActivity extends Activity
 
     @BindView(R.id.tvOnLine)
     TextView tvOnLine;//在线人数
+    private int onLineNumber;//在线人数
+
+    @BindView(R.id.tvRoomNumber)
+    TextView tvRoomNumber;//房间号
 
     @BindView(R.id.tvDzNum)
     TextView tvDzNum;//点赞数量
@@ -99,20 +161,37 @@ public class SwcameraStreamingActivity extends Activity
     @BindView(R.id.tvGoodsNum)
     TextView tvGoodsNum;//直播商品的数量
 
+    @BindView(R.id.llDsView)
+    LinearLayout llDsView;//礼物打赏弹出的视图
+    @BindView(R.id.sdvDsHead)
+    SimpleDraweeView sdvDsHead;//打赏人头像
+    @BindView(R.id.tv_ds_name)
+    TextView tvDsName;//打赏人昵称
+    @BindView(R.id.ivDsContent)
+    ImageView ivDsContent;//打赏礼物图片
+
+    @BindView(R.id.ivFunction)
+    ImageView ivFunction;//点击展开功能列表
+
     //评论列表
     @BindView(R.id.recycle_comment)
     RecyclerView recyclerView;
     //列表适配器
     private RecyclerAdapter commentAdapter;
     //评论数据源
-    private List<String> list = new ArrayList<>();
+    private List<LiveComment> commentData = new ArrayList<>();
+
+    //礼物数据源
+    private List<GiftMo> giftList = new ArrayList<>();
+
     //消息数量，始终将最新消息显示在recycelview的底部
     private int dataSize;
 
+    private UserMess userMess;
     Handler handler = new Handler(new Handler.Callback() {
         @Override
         public boolean handleMessage(Message msg) {
-            if (msg.what == 111) {
+            if (msg.what == handleMessRequestCode) {
                 ArrayList data = msg.getData().getParcelableArrayList("data");
                 dataSize++;
                 recyclerView.smoothScrollToPosition(dataSize);
@@ -122,20 +201,78 @@ public class SwcameraStreamingActivity extends Activity
         }
     });
 
-    private void setNotifyUi(){
-//            CommentMo commentMo = new CommentMo();
-//            commentMo.setType(type);
-//            commentMo.setName(auth);
-//            commentMo.setMess("赠送--"+mess);
-//            commentMo.setHead(head);
-//            Bundle bundle = new Bundle();
-//            ArrayList arr = new ArrayList();
-//            arr.add(commentMo);
-//            bundle.putStringArrayList("data", arr);
-//            Message message = new Message();
-//            message.what = 111;
-//            message.setData(bundle);
-//            handler.sendMessage(message);
+    private MyAnimatorUtil myAnimatorUtil;
+
+    private void setNotifyUi(LiveComment liveComment) {
+        Log.e("HyListener", "收到消息:" + liveComment.toString());
+        switch (liveComment.getMsgTag()) {
+            case Contents.HY_JOIN://评论消息
+                Bundle bundle3 = new Bundle();
+                ArrayList arr3 = new ArrayList();
+                arr3.add(liveComment);
+                bundle3.putStringArrayList("data", arr3);
+                Message message3 = new Message();
+                message3.what = handleMessRequestCode;
+                message3.setData(bundle3);
+                handler.sendMessage(message3);
+                break;
+            case Contents.HY_SERVER://评论消息
+                Bundle bundle2 = new Bundle();
+                ArrayList arr2 = new ArrayList();
+                arr2.add(liveComment);
+                bundle2.putStringArrayList("data", arr2);
+                Message message2 = new Message();
+                message2.what = handleMessRequestCode;
+                message2.setData(bundle2);
+                handler.sendMessage(message2);
+                break;
+            case Contents.HY_COMMENT://评论消息
+                Bundle bundle = new Bundle();
+                ArrayList arr = new ArrayList();
+                arr.add(liveComment);
+                bundle.putStringArrayList("data", arr);
+                Message message = new Message();
+                message.what = handleMessRequestCode;
+                message.setData(bundle);
+                handler.sendMessage(message);
+                break;
+            case Contents.HY_DM://弹幕消息
+                break;
+            case Contents.HY_DS://打赏消息
+                Log.e("HyListener", "收到打赏消息:" + liveComment.toString());
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        //打赏人头像
+                        sdvDsHead.setImageURI(liveComment.getHeadUrl());
+                        tvDsName.setText(liveComment.getUserName());
+                        for (int i = 0; i < giftList.size(); i++) {
+                            if (giftList.get(i).getId() == liveComment.getMsgDsComment().getGiftTag()) {
+                                Glide.with(getApplicationContext()).load(giftList.get(i).getGiftUrl()).into(ivDsContent);
+                                break;
+                            }
+                        }
+                        myAnimatorUtil.startAnimator();
+                        CountDownUtil countDownUtil = new CountDownUtil();
+                        countDownUtil.start(System.currentTimeMillis(), 3, new CountDownUtil.OnCountDownCallBack() {
+                            @Override
+                            public void onProcess(int day, int hour, int minute, int second) {
+
+                            }
+
+                            @Override
+                            public void onFinish() {
+                                myAnimatorUtil.stopAnimator();
+                            }
+                        });
+                    }
+                });
+                break;
+            case Contents.HY_ORDER://下单消息
+                break;
+        }
+
+
     }
 
     @Override
@@ -143,27 +280,163 @@ public class SwcameraStreamingActivity extends Activity
         super.onCreate(savedInstanceState);
         //不显示程序的标题栏
         requestWindowFeature(Window.FEATURE_NO_TITLE);
+
         //不显示系统的标题栏
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
 
         setContentView(R.layout.activity_swcamera_streaming);
+        mContext = this;
         ButterKnife.bind(this);
 
         //初始化用户信息
         initUserDate();
 
         //初始化直播控件
-        init();
+        initLive();
+
+        //初始化评论框
+        initCommentUi();
+
+        //初始化清屏
+        initClear();
+
+        //初始化礼物列表
+        initGift();
+
+    }
+
+    private CameraStreamingSetting camerasetting;
+    private WatermarkSetting watermarkSetting;
+    private void initLive(){
+        String publishURLFromServer = getIntent().getStringExtra("streamUrl");
+        mProfile = new StreamingProfile();
+        try {
+            mProfile.setVideoQuality(StreamingProfile.VIDEO_QUALITY_MEDIUM1)/*视频质量*/
+                    .setAudioQuality(StreamingProfile.AUDIO_QUALITY_HIGH1)/*音频质量*/
+                    .setQuicEnable(false)//RMPT or QUIC
+                    .setEncodingOrientation(StreamingProfile.ENCODING_ORIENTATION.PORT)//横竖屏   ENCODING_ORIENTATION.PORT 之后，播放端会观看竖屏的画面；反之
+                    .setEncodingSizeLevel(StreamingProfile.VIDEO_ENCODING_HEIGHT_720)
+                    .setBitrateAdjustMode(StreamingProfile.BitrateAdjustMode.Auto)//自适应码率
+                    .setEncoderRCMode(StreamingProfile.EncoderRCModes.QUALITY_PRIORITY)
+                    .setDnsManager(getMyDnsManager())
+                    .setStreamStatusConfig(new StreamingProfile.StreamStatusConfig(3))
+                    .setSendingBufferProfile(new StreamingProfile.SendingBufferProfile(0.2f, 0.8f, 3.0f, 20 * 1000))
+                    .setPublishUrl(publishURLFromServer);//设置推流地址
+
+            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);//当前竖屏；横屏SCREEN_ORIENTATION_LANDSCAPE
+
+        } catch (URISyntaxException e) {
+            e.printStackTrace();
+        }
+
+        camerasetting = new CameraStreamingSetting();
+        camerasetting.setCameraId(Camera.CameraInfo.CAMERA_FACING_FRONT) // 摄像头切换,默认前置，后置是BACK
+                .setContinuousFocusModeEnabled(true)//开启对焦
+                .setFocusMode(CameraStreamingSetting.FOCUS_MODE_CONTINUOUS_VIDEO)//自动对焦
+                .setBuiltInFaceBeautyEnabled(true)//开启美颜
+                .setFaceBeautySetting(new CameraStreamingSetting.FaceBeautySetting(0.0f, 0.0f, 0.0f))// 磨皮，美白，红润 取值范围为[0.0f, 1.0f]
+                .setVideoFilter(CameraStreamingSetting.VIDEO_FILTER_TYPE.VIDEO_FILTER_BEAUTY)
+                .setCameraPrvSizeLevel(CameraStreamingSetting.PREVIEW_SIZE_LEVEL.MEDIUM)
+                .setCameraPrvSizeRatio(CameraStreamingSetting.PREVIEW_SIZE_RATIO.RATIO_4_3);
+        mMediaStreamingManager = new MediaStreamingManager(this, cameraPreviewFrameView, SW_VIDEO_WITH_SW_AUDIO_CODEC);
+
+        //质量与性能
+        StreamingProfile.AudioProfile aProfile = new StreamingProfile.AudioProfile(44100, 48 * 1024);
+
+        StreamingProfile.VideoProfile vProfile = new StreamingProfile.VideoProfile(20, 2000 * 1024, 60, StreamingProfile.H264Profile.HIGH);
+
+        StreamingProfile.AVProfile avProfile = new StreamingProfile.AVProfile(vProfile, aProfile);
+
+        mProfile.setAVProfile(avProfile);
+
+        mMediaStreamingManager.prepare(camerasetting, mProfile);
+        mMediaStreamingManager.setStreamingStateListener(this);
+        mMediaStreamingManager.setStreamingSessionListener(this);
+        mMediaStreamingManager.setStreamStatusCallback(this);
+        mMediaStreamingManager.setAudioSourceCallback(this);
+
+        watermarkSetting = new WatermarkSetting(this);
+        watermarkSetting.setInJustDecodeBoundsEnabled(false);
+        mMediaStreamingManager.updateWatermarkSetting(watermarkSetting);
+        doTopGradualEffect();
+    }
+
+    private void initGift() {
+        RequestUtils.getGiftList(mContext, new MyObserver<List<GiftMo>>(mContext) {
+            @Override
+            public void onSuccess(List<GiftMo> list) {
+                if (list != null && list.size() > 0) {
+                    giftList = list;
+                }
+            }
+
+            @Override
+            public void onFailure(Throwable e, String errorMsg) {
+
+            }
+        });
+    }
+
+    /**
+     * 清屏
+     */
+    private void initClear() {
+        mClearScreenHelper = new ClearScreenHelper(this, mClearRootLayout);
+        mClearScreenHelper.bind(rlBottom, recyclerView, sdvHead, tvNickName, tvDzNum, tvOnLine, tvRoomNumber, llConDown);
+        mClearScreenHelper.setIClearEvent(new IClearEvent() {
+            @Override
+            public void onClearEnd() {
+
+            }
+
+            @Override
+            public void onRecovery() {
+
+            }
+        });
+    }
+
+    private void initCommentUi() {
+        commentAdapter = new RecyclerAdapter<LiveComment>(mContext, commentData, R.layout.item_comment) {
+            @Override
+            public void convert(Context mContext, BaseRecyclerHolder holder, LiveComment o) {
+                TextView tvMess = holder.getView(R.id.tvMess);
+                tvMess.setText(o.getMsgComment());
+                holder.setText(R.id.tvUser, o.getUserName());
+                //进入直播间
+                if (o.getMsgTag() == Contents.HY_JOIN) {
+                    tvMess.setTextColor(getResources().getColor(R.color.colorAccent));
+                } else {
+                    tvMess.setTextColor(getResources().getColor(R.color.colorW));
+                }
+
+                SimpleDraweeView sdvHead = holder.getView(R.id.sdvItemHead);
+                if (StringUtils.isEmpty(o.getHeadUrl())) {
+                    sdvHead.setVisibility(View.GONE);
+                } else {
+                    sdvHead.setImageURI(o.getHeadUrl());
+                    sdvHead.setVisibility(View.VISIBLE);
+                }
+            }
+        };
+        recyclerView.setAdapter(commentAdapter);
     }
 
     private void initUserDate() {
-        UserMess userMess = SPUtils.instance(this).getUser();
+
+        llNotice.setVisibility(View.VISIBLE);
+
+        userMess = SPUtils.instance(this).getUser();
         tvNickName.setText(userMess.getNickName());
         sdvHead.setImageURI(userMess.getHeadUrl());
-        tvOnLine.setText("在线  " + 100);
+        tvOnLine.setText("在线  " + 0);
         tvDzNum.setText("赞  " + userMess.getPraisedNumber());
 
         tvFinishLive.setText("开始直播");
+
+        //初始化打赏动画涉及的控件
+        myAnimatorUtil = new MyAnimatorUtil(mContext, llDsView);
+
     }
 
     /**
@@ -173,19 +446,93 @@ public class SwcameraStreamingActivity extends Activity
      */
     private void startFunction() {
 
+        //开始推流
         new Thread(new Runnable() {
             @Override
             public void run() {
-                //能够走到这里
                 if (mMediaStreamingManager != null) {
                     mMediaStreamingManager.startStreaming();
                 }
             }
         }).start();
 
+        //创建环信房间
+        createHyRoom();
+
+        initJoin();
+
         llNotice.setVisibility(View.GONE);//隐藏提示
         isStart = true;//已经开始直播标志
         tvFinishLive.setText("结束直播");
+        tvFinishLive.setBackgroundResource(R.drawable.shape_style_read);
+
+
+    }
+
+    private void initJoin() {
+        EMClient.getInstance().chatroomManager().addChatRoomChangeListener(new EMChatRoomChangeListener() {
+
+            @Override
+            public void onChatRoomDestroyed(String roomId, String roomName) {
+                Log.e("HyListener", "onChatRoomDestroyed:roomId=" + roomId + ",roomName=" + roomName);
+
+            }
+
+            @Override
+            public void onMemberJoined(String roomId, String participant) {
+                if (participant.equals("系统管理员")) return;
+                //有人进来
+                onLineNumber++;
+                tvOnLine.setText("在线 " + onLineNumber);
+                setNotifyUi(new LiveComment(Contents.HY_JOIN, participant, "", "进入直播间"));
+                Log.e("HyListener", "onMemberJoined:roomId=" + roomId + ",participant=" + participant);
+            }
+
+            @Override
+            public void onMemberExited(String roomId, String roomName, String participant) {
+                //用户退出
+                onLineNumber--;
+                tvOnLine.setText("在线 " + onLineNumber);
+                Log.e("HyListener", "onMemberExited:roomId=" + roomId + ",roomName=" + roomName + ",participant=" + participant);
+                setNotifyUi(new LiveComment(Contents.HY_JOIN, participant, "", "离开直播间"));
+            }
+
+            @Override
+            public void onRemovedFromChatRoom(int i, String s, String s1, String s2) {
+                Log.e("HyListener", "onRemovedFromChatRoom:");
+            }
+
+
+            @Override
+            public void onMuteListAdded(final String chatRoomId, final List<String> mutes, final long expireTime) {
+                Log.e("HyListener", "onMuteListAdded:");
+            }
+
+            @Override
+            public void onMuteListRemoved(final String chatRoomId, final List<String> mutes) {
+                Log.e("HyListener", "onMuteListRemoved:");
+            }
+
+            @Override
+            public void onAdminAdded(final String chatRoomId, final String admin) {
+                Log.e("HyListener", "onAdminAdded:");
+            }
+
+            @Override
+            public void onAdminRemoved(final String chatRoomId, final String admin) {
+                Log.e("HyListener", "onAdminRemoved:");
+            }
+
+            @Override
+            public void onOwnerChanged(final String chatRoomId, final String newOwner, final String oldOwner) {
+                Log.e("HyListener", "onOwnerChanged:");
+            }
+
+            @Override
+            public void onAnnouncementChanged(String chatRoomId, final String announcement) {
+                Log.e("HyListener", "onAnnouncementChanged:");
+            }
+        });
     }
 
     /**
@@ -203,27 +550,221 @@ public class SwcameraStreamingActivity extends Activity
      * 10）：获取本次成交的订单数
      */
     public void stopFunction() {
-        Intent intent = new Intent(this, LiveFinishActivity.class);
+
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    EMClient.getInstance().chatroomManager().destroyChatRoom(roomNumber);
+                } catch (HyphenateException e) {
+                    e.printStackTrace();
+                }
+            }
+        }).start();
+
+        Intent intent = new Intent(mContext, LiveFinishActivity.class);
         startActivity(intent);
         finish();
     }
 
-    @OnClick({R.id.tvFinishLive, R.id.ll_goods})
+    /**
+     * 创建环信房间
+     * 后端创建
+     */
+    private String roomNumber;
+
+    private void createHyRoom() {
+        RequestUtils.createHyRoom(this, new MyObserver<String>(this) {
+            @Override
+            public void onSuccess(String result) {
+                roomNumber = "";
+                if (result.equals("null")) {
+                    roomNumber = "环信房间未创建成功";
+                } else {
+                    roomNumber = result;
+                }
+                //房间号
+                tvRoomNumber.setText("房间号:" + roomNumber);
+
+                //注册消息监听
+                EMClient.getInstance().chatManager().addMessageListener(msgListener);
+            }
+
+            @Override
+            public void onFailure(Throwable e, String errorMsg) {
+
+            }
+        });
+    }
+
+    @OnClick({R.id.tvFinishLive, R.id.ll_goods, R.id.ivFunction, R.id.ivChangeCame})
     public void onClick(View view) {
         switch (view.getId()) {
             case R.id.tvFinishLive:
-                if (isStart){
+                if (isStart) {
                     showTips();
-                }else {
+                } else {
                     startFunction();
                 }
                 break;
             case R.id.ll_goods:
+                List<String>test = new ArrayList<>();
+                for (int i = 0; i < 5; i++) {
+                    test.add("数据");
+                }
+                BottomDialogUtil dialogUtil = new BottomDialogUtil(mContext,R.layout.dialog_goods,2) {
+                    @Override
+                    public void convert(View holder) {
+                        RecyclerView recycleGoods = holder.findViewById(R.id.recycle_goods);
+                        recycleGoods.setLayoutManager(new LinearLayoutManager(mContext));
+                        RecyclerAdapter adapter = new RecyclerAdapter<String>(mContext,test,R.layout.item_live_goods) {
+                            @Override
+                            public void convert(Context mContext, BaseRecyclerHolder holder, String o) {
+
+                            }
+                        };
+                        recycleGoods.setAdapter(adapter);
+                    }
+                };
+                dialogUtil.show();
                 break;
+            case R.id.ivFunction:
+                PopupWindowUtil.getInstance(SwcameraStreamingActivity.this).showWindow(ivFunction);
+                PopupWindowUtil.getInstance(SwcameraStreamingActivity.this).setOnTuchCalBack(new PopupWindowUtil.OnTuchCalBack() {
+                    @Override
+                    public void onclickItem(int vId) {
+                        switch (vId) {
+                            case R.id.tvMy://美颜
+                                setMy();
+                                break;
+                            case R.id.tvYy:
+                                showMusic();
+                                break;
+                            case R.id.tvKg:
+                                ToastUtil.showShort(mContext, "点击了tvKg");
+                                break;
+                            case R.id.tvLp:
+                                ToastUtil.showShort(mContext, "点击了tvLp");
+                                break;
+                        }
+                    }
+                });
+                break;
+            case R.id.ivChangeCame:
+                changeCamera();
+                break;
+                default:break;
         }
     }
 
+    private void showMusic(){
+        List<String>test = new ArrayList<>();
+        for (int i = 0; i < 20; i++) {
+            test.add("数据");
+        }
+        BottomDialogUtil dialogUtil = new BottomDialogUtil(mContext,R.layout.dialog_music,1.5) {
+            @Override
+            public void convert(View holder) {
+                RecyclerView recycleGoods = holder.findViewById(R.id.recycle_music);
+                recycleGoods.setLayoutManager(new LinearLayoutManager(mContext));
+                RecyclerAdapter adapter = new RecyclerAdapter<String>(mContext,test,R.layout.item_live_music) {
+                    @Override
+                    public void convert(Context mContext, BaseRecyclerHolder holder, String o) {
+
+                    }
+                };
+                recycleGoods.setAdapter(adapter);
+            }
+        };
+        dialogUtil.show();
+    }
+
+    private int mp = 0;//磨皮
+    private int mb = 0;//美白
+    private int hr = 0;//红润
+
+    //设置美颜，弹窗
+    private void setMy() {
+        BottomDialogUtil bottomDialogUtil = new BottomDialogUtil(mContext, R.layout.buttom_view_seebar, 0) {
+            @Override
+            public void convert(View holder) {
+                SeekBar sbMp = holder.findViewById(R.id.sbMp);
+                SeekBar sbMb = holder.findViewById(R.id.sbMb);
+                SeekBar sbHr = holder.findViewById(R.id.sbHr);
+                sbMp.setProgress(mp);
+                sbMb.setProgress(mb);
+                sbHr.setProgress(hr);
+                sbMp.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+                    @Override
+                    public void onProgressChanged(SeekBar seekBar, int progress, boolean b) {
+                        CameraStreamingSetting.FaceBeautySetting fbSetting = camerasetting.getFaceBeautySetting();
+                        //磨皮
+                        fbSetting.beautyLevel = progress / 100.0f;
+                        mMediaStreamingManager.updateFaceBeautySetting(fbSetting);
+                        mp = progress;
+                    }
+
+                    @Override
+                    public void onStartTrackingTouch(SeekBar seekBar) {
+
+                    }
+
+                    @Override
+                    public void onStopTrackingTouch(SeekBar seekBar) {
+
+                    }
+                });
+
+
+                sbMb.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+                    @Override
+                    public void onProgressChanged(SeekBar seekBar, int progress, boolean b) {
+                        CameraStreamingSetting.FaceBeautySetting fbSetting = camerasetting.getFaceBeautySetting();
+                        //美白
+                        fbSetting.whiten = progress / 100.0f;
+                        mMediaStreamingManager.updateFaceBeautySetting(fbSetting);
+                        mb = progress;
+                    }
+
+                    @Override
+                    public void onStartTrackingTouch(SeekBar seekBar) {
+
+                    }
+
+                    @Override
+                    public void onStopTrackingTouch(SeekBar seekBar) {
+
+                    }
+                });
+
+                sbHr.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+                    @Override
+                    public void onProgressChanged(SeekBar seekBar, int progress, boolean b) {
+                        CameraStreamingSetting.FaceBeautySetting fbSetting = camerasetting.getFaceBeautySetting();
+                        //红润
+                        fbSetting.redden = progress / 100.0f;
+                        mMediaStreamingManager.updateFaceBeautySetting(fbSetting);
+                        hr = progress;
+                    }
+
+                    @Override
+                    public void onStartTrackingTouch(SeekBar seekBar) {
+
+                    }
+
+                    @Override
+                    public void onStopTrackingTouch(SeekBar seekBar) {
+
+                    }
+                });
+            }
+        };
+        bottomDialogUtil.showAuto();
+    }
+
+
     private DialogUtil dialogUtil;
+
     private void showTips() {
         dialogUtil = new DialogUtil(this) {
             @Override
@@ -240,7 +781,7 @@ public class SwcameraStreamingActivity extends Activity
                         dialogUtil.des();
                     }
                 });
-                holder.setText(R.id.tv_tips,String.valueOf(chronometer.getBase()));
+                holder.setText(R.id.tv_tips, String.valueOf(chronometer.getBase()));
             }
         };
         dialogUtil.show(R.layout.dialog_tip);
@@ -253,46 +794,18 @@ public class SwcameraStreamingActivity extends Activity
     }
 
     @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        PopupWindowUtil.getInstance(SwcameraStreamingActivity.this).destroy();
+    }
+
+    @Override
     protected void onPause() {
         super.onPause();
         // You must invoke pause here.
         mMediaStreamingManager.pause();
     }
 
-    private void init() {
-        //get form you server
-        //在七牛云控制台创建推流，如下是推流地址
-        String publishURLFromServer = getIntent().getStringExtra("streamUrl");
-        String liveTag = getIntent().getStringExtra("liveTag");
-        mCameraPreviewSurfaceView = findViewById(R.id.cameraPreview_surfaceView);
-        try {
-            //encoding setting
-            mProfile = new StreamingProfile();
-            mProfile.setVideoQuality(StreamingProfile.VIDEO_QUALITY_HIGH1)
-                    .setAudioQuality(StreamingProfile.AUDIO_QUALITY_MEDIUM2)
-                    .setEncodingSizeLevel(StreamingProfile.VIDEO_ENCODING_HEIGHT_480)
-                    .setEncoderRCMode(StreamingProfile.EncoderRCModes.QUALITY_PRIORITY)
-                    .setPublishUrl(publishURLFromServer);
-            //preview setting
-            CameraStreamingSetting camerasetting = new CameraStreamingSetting();
-            camerasetting.setCameraId(Camera.CameraInfo.CAMERA_FACING_FRONT)
-                    .setContinuousFocusModeEnabled(true)
-                    .setCameraPrvSizeLevel(CameraStreamingSetting.PREVIEW_SIZE_LEVEL.MEDIUM)
-                    .setCameraPrvSizeRatio(CameraStreamingSetting.PREVIEW_SIZE_RATIO.RATIO_16_9);
-            //streaming engine init and setListener
-            mMediaStreamingManager = new MediaStreamingManager(this, mCameraPreviewSurfaceView, AVCodecType.SW_VIDEO_WITH_SW_AUDIO_CODEC);  // soft codec
-            mMediaStreamingManager.prepare(camerasetting, mProfile);
-            mMediaStreamingManager.setStreamingStateListener(this);
-            mMediaStreamingManager.setStreamingSessionListener(this);
-            mMediaStreamingManager.setStreamStatusCallback(this);
-            mMediaStreamingManager.setAudioSourceCallback(this);
-            doTopGradualEffect();
-        } catch (URISyntaxException e) {
-            e.printStackTrace();
-            ToastUtil.showShort(this, e.getMessage());
-            finish();
-        }
-    }
 
 
 
@@ -306,12 +819,19 @@ public class SwcameraStreamingActivity extends Activity
                 Log.e(TAG, "READY");
                 //初始化成功
                 initStatus = true;
+                if (!isStart){
+                    setNotifyUi(new LiveComment(Contents.HY_SERVER, "跳跳直播", Contents.appLogo, "正在连接..."));
+                }
                 break;
             case CONNECTING:
                 Log.e(TAG, "连接中");
+                setNotifyUi(new LiveComment(Contents.HY_SERVER, "跳跳直播", Contents.appLogo, "连接成功..."));
                 break;
             case STREAMING:
                 Log.e(TAG, "推流中");
+                if (!isStart){
+                    setNotifyUi(new LiveComment(Contents.HY_SERVER, "跳跳直播", Contents.appLogo, "跳跳已万事具备，只欠您的表演,开始吧！"));
+                }
                 //开始计时
                 runOnUiThread(new Runnable() {
                     @Override
@@ -325,15 +845,18 @@ public class SwcameraStreamingActivity extends Activity
                 break;
             case SHUTDOWN:
                 Log.e(TAG, "直播中断");
+                setNotifyUi(new LiveComment(Contents.HY_SERVER, "跳跳直播", Contents.appLogo, "跳跳中断..."));
                 break;
             case IOERROR:
                 Log.e(TAG, "网络连接失败");
+                setNotifyUi(new LiveComment(Contents.HY_SERVER, "跳跳直播", Contents.appLogo, "网络连接失败..."));
                 break;
             case OPEN_CAMERA_FAIL:
                 Log.e(TAG, "摄像头打开失败");
                 break;
             case DISCONNECTED:
                 Log.e(TAG, "已经断开连接");
+                setNotifyUi(new LiveComment(Contents.HY_SERVER, "跳跳直播", Contents.appLogo, "已经断开连接..."));
                 break;
             case TORCH_INFO:
                 Log.e(TAG, "开启闪光灯");
@@ -427,17 +950,115 @@ public class SwcameraStreamingActivity extends Activity
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         if (keyCode == KeyEvent.KEYCODE_BACK
                 && event.getAction() == KeyEvent.ACTION_DOWN) {
-            if (dialogUtil!=null){
-                if (dialogUtil.isShow()){
-                    dialogUtil.des();
-                }else {
+            if (isStart) {//已经开始了
+                if (dialogUtil != null) {
+                    if (dialogUtil.isShow()) {
+                        dialogUtil.des();
+                    } else {
+                        showTips();
+                    }
+                } else {
                     showTips();
                 }
-            }else {
-                showTips();
+            } else {
+                return super.onKeyDown(keyCode, event);
             }
             return true;
         }
         return super.onKeyDown(keyCode, event);
     }
+
+
+    EMMessageListener msgListener = new EMMessageListener() {
+
+        @Override
+        public void onMessageReceived(List<EMMessage> messages) {
+            Log.e("HyListener", "onMessageReceived:" + messages.toString());
+            for (EMMessage message : messages) {
+                String username = null;
+                // 群组消息
+                if (message.getChatType() == EMMessage.ChatType.GroupChat || message.getChatType() == EMMessage.ChatType.ChatRoom) {
+                    username = message.getTo();
+                } else {
+                    // 单聊消息
+                    username = message.getFrom();
+                }
+                Log.e("HyListener", "onMessageReceived:" + username);
+                // 如果是当前会话的消息，刷新聊天页面
+                if (username.equals(roomNumber)) {
+                    EMTextMessageBody txtBody = (EMTextMessageBody) message.getBody();
+                    Gson gson = new Gson();
+                    LiveComment liveComment = gson.fromJson(txtBody.getMessage(), LiveComment.class);
+                    setNotifyUi(liveComment);
+                }
+            }
+        }
+
+        @Override
+        public void onCmdMessageReceived(List<EMMessage> messages) {
+            // 收到透传消息
+            Log.e("HyListener", "onCmdMessageReceived:" + messages.toString());
+        }
+
+        @Override
+        public void onMessageRead(List<EMMessage> list) {
+            Log.e("HyListener", "onMessageRead:" + list.toString());
+        }
+
+        @Override
+        public void onMessageDelivered(List<EMMessage> list) {
+            Log.e("HyListener", "onMessageDelivered:" + list.toString());
+        }
+
+        @Override
+        public void onMessageRecalled(List<EMMessage> list) {
+            Log.e("HyListener", "onMessageRecalled:" + list.toString());
+        }
+
+        @Override
+        public void onMessageChanged(EMMessage emMessage, Object o) {
+            Log.e("HyListener", "onMessageChanged:" + o.toString());
+        }
+    };
+
+    private int mCurrentCamFacingIndex;
+
+    private void changeCamera() {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                //mCurrentCamFacingIndex = (mCurrentCamFacingIndex + 1) % CameraStreamingSetting.getNumberOfCameras();
+                CameraStreamingSetting.CAMERA_FACING_ID facingId;
+                if (mCurrentCamFacingIndex == CameraStreamingSetting.CAMERA_FACING_ID.CAMERA_FACING_BACK.ordinal()) {
+                    facingId = CameraStreamingSetting.CAMERA_FACING_ID.CAMERA_FACING_BACK;
+                    mCurrentCamFacingIndex = CameraStreamingSetting.CAMERA_FACING_ID.CAMERA_FACING_FRONT.ordinal();
+                } else if (mCurrentCamFacingIndex == CameraStreamingSetting.CAMERA_FACING_ID.CAMERA_FACING_FRONT.ordinal()) {
+                    facingId = CameraStreamingSetting.CAMERA_FACING_ID.CAMERA_FACING_FRONT;
+                    mCurrentCamFacingIndex = CameraStreamingSetting.CAMERA_FACING_ID.CAMERA_FACING_BACK.ordinal();
+                } else {
+                    facingId = CameraStreamingSetting.CAMERA_FACING_ID.CAMERA_FACING_3RD;
+                }
+                Log.i(TAG, "switchCamera:" + facingId);
+                mMediaStreamingManager.switchCamera(facingId);
+            }
+        }).start();
+    }
+
+    /**
+     * @author:
+     * @create at: 2018/11/14  10:57
+     * @Description: 防止 Dns 被劫持
+     */
+    private static DnsManager getMyDnsManager() {
+        IResolver r0 = null;
+        IResolver r1 = new DnspodFree();
+        IResolver r2 = AndroidDnsServer.defaultResolver();
+        try {
+            r0 = new Resolver(InetAddress.getByName("119.29.29.29"));
+        } catch (IOException ex) {
+            ex.printStackTrace();
+        }
+        return new DnsManager(NetworkInfo.normal, new IResolver[]{r0, r1, r2});
+    }
+
 }

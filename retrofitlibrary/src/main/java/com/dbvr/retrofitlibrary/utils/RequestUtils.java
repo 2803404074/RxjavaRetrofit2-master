@@ -2,6 +2,7 @@ package com.dbvr.retrofitlibrary.utils;
 
 import android.content.Context;
 
+import com.dbvr.baselibrary.model.GiftMo;
 import com.dbvr.baselibrary.model.QiniuUploadFile;
 import com.dbvr.baselibrary.model.StreamMo;
 import com.dbvr.baselibrary.model.TagMo;
@@ -56,7 +57,21 @@ public class RequestUtils {
                 .subscribe(observer);
     }
 
+    //创建环信房间
+    public static void createHyRoom(Context context,MyObserver<String> observer) {
+        RetrofitUtils.getApiUrl(context)
+                .createHyRoom()
+                .compose(RxHelper.observableIO2Main(context))
+                .subscribe(observer);
+    }
 
+    //获取礼物列表
+    public static void getGiftList(Context context,MyObserver<List<GiftMo>> observer) {
+        RetrofitUtils.getApiUrl(context)
+                .getGiftList()
+                .compose(RxHelper.observableIO2Main(context))
+                .subscribe(observer);
+    }
 
 
 

@@ -126,7 +126,6 @@ public class SPUtils {
         Gson gson = new Gson();
         //change data to json
         String strJson = gson.toJson(data);
-        editor.clear();
         editor.putString(tag, strJson);
         editor.commit();
     }

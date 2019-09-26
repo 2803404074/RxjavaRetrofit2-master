@@ -14,10 +14,10 @@ import butterknife.OnClick;
 
 public class LiveFinishActivity extends BaseActivity {
 
-    @BindView(R.id.sdvHead)
+    @BindView(R.id.sdvHead_finish)
     SimpleDraweeView sdvHead;
 
-    @BindView(R.id.sdvHead_finish)
+    @BindView(R.id.tvNickName)
     TextView tvNickName;
     @Override
     public int setLayout() {

@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:padding="@dimen/dp_5"
+    android:layout_marginVertical="@dimen/dp_5"
+    android:background="@android:color/white">
+
+    <RelativeLayout
+        android:layout_width="@dimen/dp_70"
+        android:layout_height="@dimen/dp_70">
+        <ImageView
+            android:layout_width="@dimen/dp_70"
+            android:layout_height="@dimen/dp_70"
+            android:src="@mipmap/test3"
+            android:scaleType="centerCrop"/>
+        <ImageView
+            android:layout_width="@dimen/dp_50"
+            android:layout_height="@dimen/dp_50"
+            android:layout_centerHorizontal="true"
+            android:layout_centerVertical="true"
+            android:src="@mipmap/music_play"/>
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent">
+        <TextView
+            android:id="@+id/tvMusicTitle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingLeft="@dimen/dp_5"
+            android:textSize="@dimen/sp_18"
+            android:layout_above="@+id/tvMusicName"
+            android:textColor="@android:color/black"
+            android:ellipsize="end"
+            android:text="你是我唯一"/>
+
+        <TextView
+            android:id="@+id/tvMusicName"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingLeft="@dimen/dp_5"
+            android:layout_centerVertical="true"
+            android:textSize="@dimen/sp_15"
+            android:textColor="#8a8a8a"
+            android:ellipsize="end"
+            android:text="汤唯"/>
+
+        <TextView
+            android:id="@+id/tvMusicNumber"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/tvMusicName"
+            android:paddingLeft="@dimen/dp_5"
+            android:textSize="@dimen/sp_15"
+            android:textColor="#8a8a8a"
+            android:ellipsize="end"
+            android:text="共有150人演唱"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:textSize="@dimen/sp_17"
+            android:textColor="@color/colorBlue01"
+            android:layout_centerVertical="true"
+            android:paddingHorizontal="@dimen/dp_5"
+            android:background="@drawable/shape_bk_blue"
+            android:text="播放"/>
+    </RelativeLayout>
+
+
+
+</LinearLayout>

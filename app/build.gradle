@@ -48,6 +48,7 @@ dependencies {
     implementation 'com.github.wildma:PictureSelector:1.1.4'
     implementation project(path: ':retrofitlibrary')
     implementation project(path: ':baselibrary')
+    implementation project(path: ':clearScreen')
     implementation files('libs/pldroid-media-streaming-2.4.0.jar')
     implementation files('libs/hyphenatechat_3.6.1.jar')
 }

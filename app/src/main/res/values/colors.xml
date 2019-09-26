@@ -12,6 +12,8 @@
     <color name="colorGray2">#c5c5c5</color>
     <color name="colorGray4">#ffd2d2d2</color>
     <color name="colorTouMing">#26ffffff</color>
+    <color name="colorTouMing1">#4d000000</color>
+    <color name="colorTouMing2">#1a000000</color>
     <color name="green01">#24ecbb</color>
     <color name="green02">#18dadc</color>
     <color name="colorOr01">#F19149</color>
