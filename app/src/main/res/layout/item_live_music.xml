@@ -11,6 +11,7 @@
         android:layout_width="@dimen/dp_70"
         android:layout_height="@dimen/dp_70">
         <ImageView
+            android:id="@+id/ivContent"
             android:layout_width="@dimen/dp_70"
             android:layout_height="@dimen/dp_70"
             android:src="@mipmap/test3"
@@ -42,11 +43,12 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:paddingLeft="@dimen/dp_5"
+            android:paddingVertical="@dimen/dp_3"
             android:layout_centerVertical="true"
-            android:textSize="@dimen/sp_15"
+            android:textSize="@dimen/sp_16"
             android:textColor="#8a8a8a"
             android:ellipsize="end"
-            android:text="汤唯"/>
+            android:text="跳跳直播专属音乐"/>
 
         <TextView
             android:id="@+id/tvMusicNumber"
@@ -57,18 +59,15 @@
             android:textSize="@dimen/sp_15"
             android:textColor="#8a8a8a"
             android:ellipsize="end"
-            android:text="共有150人演唱"/>
+            android:text="热度排行"/>
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+        <ImageView
+            android:id="@+id/ivTips"
+            android:layout_width="@dimen/dp_40"
+            android:layout_height="@dimen/dp_40"
             android:layout_alignParentRight="true"
-            android:textSize="@dimen/sp_17"
-            android:textColor="@color/colorBlue01"
             android:layout_centerVertical="true"
-            android:paddingHorizontal="@dimen/dp_5"
-            android:background="@drawable/shape_bk_blue"
-            android:text="播放"/>
+            android:src="@mipmap/music_play"/>
     </RelativeLayout>
 
 

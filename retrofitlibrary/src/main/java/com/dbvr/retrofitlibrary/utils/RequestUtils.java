@@ -3,9 +3,12 @@ package com.dbvr.retrofitlibrary.utils;
 import android.content.Context;
 
 import com.dbvr.baselibrary.model.GiftMo;
+import com.dbvr.baselibrary.model.MusicMo;
+import com.dbvr.baselibrary.model.Notice;
 import com.dbvr.baselibrary.model.QiniuUploadFile;
 import com.dbvr.baselibrary.model.StreamMo;
 import com.dbvr.baselibrary.model.TagMo;
+import com.dbvr.baselibrary.model.TaskMo;
 import com.dbvr.baselibrary.model.UserMess;
 import com.dbvr.retrofitlibrary.bean.Demo;
 import com.dbvr.retrofitlibrary.model.GoodsCategoryList;
@@ -69,6 +72,38 @@ public class RequestUtils {
     public static void getGiftList(Context context,MyObserver<List<GiftMo>> observer) {
         RetrofitUtils.getApiUrl(context)
                 .getGiftList()
+                .compose(RxHelper.observableIO2Main(context))
+                .subscribe(observer);
+    }
+
+    //获取任务列表
+    public static void getTaskList(Context context,String timeStamp,MyObserver<List<TaskMo>> observer) {
+        RetrofitUtils.getApiUrl(context)
+                .getTaskList(timeStamp)
+                .compose(RxHelper.observableIO2Main(context))
+                .subscribe(observer);
+    }
+
+    //预告列表
+    public static void getNoticeList(Context context,MyObserver<List<Notice>> observer) {
+        RetrofitUtils.getApiUrl(context)
+                .getNoticeList()
+                .compose(RxHelper.observableIO2Main(context))
+                .subscribe(observer);
+    }
+
+    //新增预告
+    public static void addNotice(Context context,MyObserver<Object> observer) {
+        RetrofitUtils.getApiUrl(context)
+                .addNotice()
+                .compose(RxHelper.observableIO2Main(context))
+                .subscribe(observer);
+    }
+
+    //获取音乐列表
+    public static void getMusicList(Context context,MyObserver<List<MusicMo>> observer) {
+        RetrofitUtils.getApiUrl(context)
+                .getMusicList()
                 .compose(RxHelper.observableIO2Main(context))
                 .subscribe(observer);
     }

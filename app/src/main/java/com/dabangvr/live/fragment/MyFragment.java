@@ -10,6 +10,10 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.dabangvr.live.R;
+import com.dabangvr.live.activity.MyLiveActivity;
+import com.dabangvr.live.activity.MyMessActivity;
+import com.dabangvr.live.activity.MyOrderActivity;
+import com.dabangvr.live.activity.MySyActivity;
 import com.dabangvr.live.base.BaseFragment;
 import com.dabangvr.live.base.BaseRecyclerHolder;
 import com.dabangvr.live.base.RecyclerAdapter;
@@ -19,7 +23,9 @@ import com.dbvr.baselibrary.utils.SPUtils;
 import com.facebook.drawee.view.SimpleDraweeView;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import butterknife.BindView;
 
@@ -75,16 +81,17 @@ public class MyFragment extends BaseFragment {
             @Override
             public void onItemClick(View view, int position) {
                 Class T = null;
+                Map<String,Object>map = new HashMap<>();
                 switch (mData.get(position).getId()){
-                    case "wdzb":break;
-                    case "dsp":break;
-                    case "wdsy":break;
-                    case "dd":break;
+                    case "wdzb":T = MyLiveActivity.class;break;
+                    case "dsp":T = MyLiveActivity.class;map.put("isShort",true);break;
+                    case "wdsy":T = MySyActivity.class;break;
+                    case "dd":T = MyOrderActivity.class;break;
                     case "zx":break;
-                    case "xx":break;
+                    case "xx":T = MyMessActivity.class;break;
                     case "sz":break;
                 }
-                goTActivity(T,null);
+                goTActivity(T,map);
             }
         });
     }

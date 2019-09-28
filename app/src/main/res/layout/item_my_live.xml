@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_gravity="center"
+    android:background="@android:color/white"
+    android:padding="@dimen/dp_10"
+    android:layout_height="@dimen/dp_150">
+
+   <ImageView
+       android:id="@+id/ivContent"
+       android:layout_width="match_parent"
+       android:layout_height="match_parent"
+       android:src="@mipmap/test3"
+       android:layout_centerHorizontal="true"
+       android:scaleType="centerCrop"/>
+
+    <TextView
+        android:background="@drawable/shape_touming_bg"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="@dimen/sp_15"
+        android:layout_alignParentRight="true"
+        android:textColor="@android:color/white"
+        android:paddingHorizontal="@dimen/dp_5"
+        android:text="01:25:24"/>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center"
+        android:background="@drawable/shape_touming_bg"
+        android:layout_alignParentBottom="true">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@android:color/white"
+            android:textSize="@dimen/sp_14"
+            android:text="2019-9-24"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@color/colorOr01"
+            android:textSize="@dimen/sp_14"
+            android:layout_marginLeft="@dimen/dp_10"
+            android:text="88888人"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@android:color/white"
+            android:textSize="@dimen/sp_14"
+            android:text="观看"/>
+    </LinearLayout>
+</RelativeLayout>

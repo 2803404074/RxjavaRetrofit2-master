@@ -9,6 +9,7 @@ import android.widget.TextView;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import com.dabangvr.live.R;
+import com.dbvr.baselibrary.model.UserMess;
 import com.dbvr.baselibrary.utils.SPUtils;
 
 public class WellcomActivity extends AppCompatActivity {
@@ -21,11 +22,12 @@ public class WellcomActivity extends AppCompatActivity {
         text_version = this.findViewById(R.id.text_version);
         text_version.setText("V" + getVersion());
 
-        if (null == SPUtils.instance(this).getUser()){
+        UserMess userMess = SPUtils.instance(this).getUser();
+        if (null == userMess){
             goTActivity(LoginActivity.class);
         }else {
             goTActivity(MainActivity.class);
-            SPUtils.instance(this).put("token",SPUtils.instance(this).getUser().getToken());
+            SPUtils.instance(this).put("token",userMess.getToken());
         }
     }
     private void goTActivity(final Class T){

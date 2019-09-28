@@ -1,8 +1,11 @@
 package com.dbvr.retrofitlibrary.service;
 import com.dbvr.baselibrary.model.GiftMo;
+import com.dbvr.baselibrary.model.MusicMo;
+import com.dbvr.baselibrary.model.Notice;
 import com.dbvr.baselibrary.model.QiniuUploadFile;
 import com.dbvr.baselibrary.model.StreamMo;
 import com.dbvr.baselibrary.model.TagMo;
+import com.dbvr.baselibrary.model.TaskMo;
 import com.dbvr.baselibrary.model.UserMess;
 import com.dbvr.retrofitlibrary.bean.Beanx;
 import com.dbvr.retrofitlibrary.bean.Constans;
@@ -80,6 +83,39 @@ public interface ApiUrl {
     @POST(Constans.HY_CREATE_ROOM)
     Observable<BaseResponse<String>> createHyRoom();
 
+    //任务列表
+    @POST(Constans.MyTask)
+    @FormUrlEncoded
+    Observable<BaseResponse<List<TaskMo>>> getTaskList(@Field("timeStamp") String timeStamp);
+
+    //预告列表
+    @POST(Constans.MyNoticeList)
+    Observable<BaseResponse<List<Notice>>> getNoticeList();
+
+    //新增预告
+    @POST(Constans.AddNotice)
+    Observable<BaseResponse<Object>> addNotice();
+
+    //音乐列表
+    @POST(Constans.MusicList)
+    Observable<BaseResponse<List<MusicMo>>> getMusicList();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     /**
      * 有效链接
      */
@@ -91,8 +127,6 @@ public interface ApiUrl {
 
     @GET(Constans.retrofitList)
     Observable<BaseResponse<List<Demo>>> getDemoList();
-
-
 
 
     /**

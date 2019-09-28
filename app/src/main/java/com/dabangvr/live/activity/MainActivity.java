@@ -29,6 +29,8 @@ import com.hyphenate.exceptions.HyphenateException;
 
 import butterknife.BindView;
 
+import static com.dbvr.baselibrary.base.Contents.HY_PASS;
+
 public class MainActivity extends BaseActivity implements BottomNavigationView.OnNavigationItemSelectedListener {
 
     @BindView(R.id.nav_view)
@@ -55,9 +57,9 @@ public class MainActivity extends BaseActivity implements BottomNavigationView.O
         UserMess userMess = SPUtils.instance(this).getUser();
         boolean isHyLogin = (boolean) SPUtils.instance(this).getkey("isHyLogin",false);
         if (isHyLogin){
-            loginToHx(String.valueOf(userMess.getId()),userMess.getToken());
+            loginToHx(String.valueOf(userMess.getId()),HY_PASS);
         }else {
-            registerHX(String.valueOf(userMess.getId()),userMess.getToken());
+            registerHX(String.valueOf(userMess.getId()),HY_PASS);
         }
     }
     private void registerHX(final String name, final String pass) {
@@ -83,11 +85,9 @@ public class MainActivity extends BaseActivity implements BottomNavigationView.O
             @Override
             public void onSuccess() {
                 // ** 第一次登录或者之前logout后再登录，加载所有本地群和回话
-                // ** manually load all local groups and
                 EMClient.getInstance().groupManager().loadAllGroups();
                 EMClient.getInstance().chatManager().loadAllConversations();
                 SPUtils.instance(getContext()).put("isHyLogin",true);
-//                ToastUtil.showShort(getContext(),"环信登陆成功");
             }
 
             @Override
@@ -95,7 +95,14 @@ public class MainActivity extends BaseActivity implements BottomNavigationView.O
             }
             @Override
             public void onError(final int code, final String message) {
-                ToastUtil.showShort(getContext(),message);
+                if (code == 202){
+                    ToastUtil.showShort(getContext(),"密码错误");
+                    return;
+                }
+                if(code == EMError.USER_NOT_FOUND){
+                    //找不到用户,去注册
+                    registerHX(name, psd);
+                }
             }
         });
     }

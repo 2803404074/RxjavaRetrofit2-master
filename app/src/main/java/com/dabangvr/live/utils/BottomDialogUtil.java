@@ -35,6 +35,10 @@ public abstract class BottomDialogUtil {
         this.onDismissCallBack = onDismissCallBack;
     }
 
+    public View getView() {
+        return view;
+    }
+
     public BottomDialogUtil(Context mContext, int layoutId, double h) {
         this.mContext = mContext;
         LayoutId = layoutId;

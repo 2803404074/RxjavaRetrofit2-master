@@ -7,7 +7,7 @@
     android:background="@drawable/shape_function">
 
     <LinearLayout
-        android:id="@+id/tvMy"
+        android:id="@+id/llCancelMy"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginVertical="@dimen/dp_3"
@@ -26,11 +26,11 @@
             android:layout_height="wrap_content"
             android:textSize="@dimen/sp_15"
             android:gravity="center"
-            android:text="美颜"/>
+            android:text="关闭美颜"/>
     </LinearLayout>
 
     <LinearLayout
-        android:id="@+id/tvYy"
+        android:id="@+id/llSetMy"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginVertical="@dimen/dp_3"
@@ -40,7 +40,7 @@
             android:layout_width="@dimen/dp_30"
             android:layout_height="@dimen/dp_30"
             android:padding="@dimen/dp_5"
-            android:src="@mipmap/music"/>
+            android:src="@mipmap/cancel_my"/>
         <TextView
 
             android:layout_gravity="center"
@@ -49,12 +49,12 @@
             android:layout_height="wrap_content"
             android:textSize="@dimen/sp_15"
             android:gravity="center"
-            android:text="音乐"/>
+            android:text="调整美颜"/>
     </LinearLayout>
 
 
     <LinearLayout
-        android:id="@+id/tvKg"
+        android:id="@+id/llOpenLight"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginVertical="@dimen/dp_3"
@@ -64,20 +64,20 @@
             android:layout_width="@dimen/dp_30"
             android:layout_height="@dimen/dp_30"
             android:padding="@dimen/dp_5"
-            android:src="@mipmap/songe"/>
+            android:src="@mipmap/shan_guang"/>
         <TextView
-
+            android:id="@+id/tvOnOffLine"
             android:layout_gravity="center"
             android:textColor="@android:color/white"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textSize="@dimen/sp_15"
             android:gravity="center"
-            android:text="K歌"/>
+            android:text="开启闪光灯"/>
     </LinearLayout>
 
     <LinearLayout
-        android:id="@+id/tvLp"
+        android:id="@+id/llScreen"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginVertical="@dimen/dp_3"

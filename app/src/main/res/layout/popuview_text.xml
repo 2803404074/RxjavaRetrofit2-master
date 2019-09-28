@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginVertical="@dimen/dp_5"
+    android:background="@drawable/shape_white"
+    android:orientation="vertical"
+    android:padding="@dimen/dp_5">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="提成说明:"
+            android:textColor="@color/colorOr01"
+            android:textSize="@dimen/sp_18" />
+
+        <TextView
+            android:id="@+id/tvGoodsTx"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="啊啊啊"
+            android:textColor="@android:color/darker_gray"
+            android:textSize="@dimen/sp_16" />
+    </LinearLayout>
+
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/dp_10"
+        android:orientation="horizontal">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="介绍技巧:"
+            android:textColor="@color/colorOr01"
+            android:textSize="@dimen/sp_18" />
+
+        <TextView
+            android:id="@+id/tvJq"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="啊啊啊"
+            android:textColor="@android:color/darker_gray"
+            android:textSize="@dimen/sp_16" />
+    </LinearLayout>
+</LinearLayout>

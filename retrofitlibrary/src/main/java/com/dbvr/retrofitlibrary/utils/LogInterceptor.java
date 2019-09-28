@@ -25,10 +25,12 @@ public class LogInterceptor implements Interceptor{
     @Override
     public okhttp3.Response intercept(Chain chain) throws IOException {
         Request request = chain.request();
-        Request.Builder requestBuilde = request.newBuilder()
-        .header(Constans.TOKEN, (String) SPUtils.instance(mContext).getkey("token",""));
 
-        Log.e(TAG,"request:" + request.toString());
+        String token = (String) SPUtils.instance(mContext).getkey("token","");
+        Request.Builder requestBuilde = request.newBuilder()
+        .header(Constans.TOKEN, token);
+
+        Log.e(TAG,"request:" + token);
 
         Request requestx = requestBuilde.build();
         return chain.proceed(requestx);

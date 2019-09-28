@@ -14,25 +14,23 @@ import android.graphics.Rect;
 import android.graphics.Shader;
 import android.graphics.Xfermode;
 import android.hardware.Camera;
+import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.os.SystemClock;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.View;
-import android.view.Window;
-import android.view.WindowManager;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.Chronometer;
-import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
-import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -44,15 +42,20 @@ import com.dabangvr.live.base.AppManager;
 import com.dabangvr.live.base.BaseRecyclerHolder;
 import com.dabangvr.live.base.RecyclerAdapter;
 import com.dabangvr.live.livezb.ui.CameraPreviewFrameView;
+import com.dabangvr.live.livezb.view.LiveFunctionView;
 import com.dabangvr.live.utils.BottomDialogUtil;
 import com.dabangvr.live.utils.CountDownUtil;
+import com.dabangvr.live.utils.DataUtil;
 import com.dabangvr.live.utils.DialogUtil;
+import com.dabangvr.live.utils.InputUtil;
 import com.dabangvr.live.utils.PopupWindowUtil;
 import com.dbvr.baselibrary.base.Contents;
 import com.dbvr.baselibrary.model.GiftMo;
 import com.dbvr.baselibrary.model.LiveComment;
+import com.dbvr.baselibrary.model.MusicMo;
 import com.dbvr.baselibrary.model.UserMess;
 import com.dbvr.baselibrary.utils.MyAnimatorUtil;
+import com.dbvr.baselibrary.utils.MyAnimatorUtil2;
 import com.dbvr.baselibrary.utils.SPUtils;
 import com.dbvr.baselibrary.utils.ToastUtil;
 import com.dbvr.retrofitlibrary.observer.MyObserver;
@@ -96,6 +99,7 @@ import butterknife.OnClick;
 import yellow5a5.clearscreenhelper.ClearScreenHelper;
 import yellow5a5.clearscreenhelper.IClearEvent;
 import yellow5a5.clearscreenhelper.IClearRootView;
+
 import static com.qiniu.pili.droid.streaming.AVCodecType.SW_VIDEO_WITH_SW_AUDIO_CODEC;
 
 public class SwcameraStreamingActivity extends Activity implements
@@ -147,8 +151,12 @@ public class SwcameraStreamingActivity extends Activity implements
     @BindView(R.id.tvDzNum)
     TextView tvDzNum;//点赞数量
 
+    @BindView(R.id.tvTbSy)
+    TextView tvTbSy;//收到礼物的时候，弹出收益数据
+
     @BindView(R.id.charCounter)
     Chronometer chronometer;//计时器
+    private int miss = 0;//总秒数
 
     private boolean initStatus = false;//初始化成功标志
     private boolean isStart = false;//未开始直播或正在直播标志
@@ -249,10 +257,16 @@ public class SwcameraStreamingActivity extends Activity implements
                         for (int i = 0; i < giftList.size(); i++) {
                             if (giftList.get(i).getId() == liveComment.getMsgDsComment().getGiftTag()) {
                                 Glide.with(getApplicationContext()).load(giftList.get(i).getGiftUrl()).into(ivDsContent);
+                                tvTbSy.setText("收益+" + giftList.get(i).getGiftCoins());
                                 break;
                             }
                         }
                         myAnimatorUtil.startAnimator();
+
+                        List<View> list = new ArrayList<>();
+                        list.add(llDsView);
+                        list.add(tvTbSy);
+                        MyAnimatorUtil2.getInstance(mContext).startAnimatorHorizontal(list, 0, 250);
                         CountDownUtil countDownUtil = new CountDownUtil();
                         countDownUtil.start(System.currentTimeMillis(), 3, new CountDownUtil.OnCountDownCallBack() {
                             @Override
@@ -262,7 +276,7 @@ public class SwcameraStreamingActivity extends Activity implements
 
                             @Override
                             public void onFinish() {
-                                myAnimatorUtil.stopAnimator();
+                                MyAnimatorUtil2.getInstance(mContext).stopAnimator(list, 0, 250);
                             }
                         });
                     }
@@ -270,20 +284,16 @@ public class SwcameraStreamingActivity extends Activity implements
                 break;
             case Contents.HY_ORDER://下单消息
                 break;
+            case Contents.HY_DZ://点赞消息,收到一条累计
+                tvDzNum.setText("赞 "+dzNum);
+                break;
         }
-
-
     }
+    private int dzNum = 0;//点赞累加
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        //不显示程序的标题栏
-        requestWindowFeature(Window.FEATURE_NO_TITLE);
-
-        //不显示系统的标题栏
-        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
-
         setContentView(R.layout.activity_swcamera_streaming);
         mContext = this;
         ButterKnife.bind(this);
@@ -307,7 +317,8 @@ public class SwcameraStreamingActivity extends Activity implements
 
     private CameraStreamingSetting camerasetting;
     private WatermarkSetting watermarkSetting;
-    private void initLive(){
+
+    private void initLive() {
         String publishURLFromServer = getIntent().getStringExtra("streamUrl");
         mProfile = new StreamingProfile();
         try {
@@ -452,6 +463,7 @@ public class SwcameraStreamingActivity extends Activity implements
             public void run() {
                 if (mMediaStreamingManager != null) {
                     mMediaStreamingManager.startStreaming();
+
                 }
             }
         }).start();
@@ -462,7 +474,6 @@ public class SwcameraStreamingActivity extends Activity implements
         initJoin();
 
         llNotice.setVisibility(View.GONE);//隐藏提示
-        isStart = true;//已经开始直播标志
         tvFinishLive.setText("结束直播");
         tvFinishLive.setBackgroundResource(R.drawable.shape_style_read);
 
@@ -608,16 +619,16 @@ public class SwcameraStreamingActivity extends Activity implements
                 }
                 break;
             case R.id.ll_goods:
-                List<String>test = new ArrayList<>();
+                List<String> test = new ArrayList<>();
                 for (int i = 0; i < 5; i++) {
                     test.add("数据");
                 }
-                BottomDialogUtil dialogUtil = new BottomDialogUtil(mContext,R.layout.dialog_goods,2) {
+                BottomDialogUtil dialogUtil = new BottomDialogUtil(mContext, R.layout.dialog_goods, 2) {
                     @Override
                     public void convert(View holder) {
                         RecyclerView recycleGoods = holder.findViewById(R.id.recycle_goods);
                         recycleGoods.setLayoutManager(new LinearLayoutManager(mContext));
-                        RecyclerAdapter adapter = new RecyclerAdapter<String>(mContext,test,R.layout.item_live_goods) {
+                        RecyclerAdapter adapter = new RecyclerAdapter<String>(mContext, test, R.layout.item_live_goods) {
                             @Override
                             public void convert(Context mContext, BaseRecyclerHolder holder, String o) {
 
@@ -629,55 +640,60 @@ public class SwcameraStreamingActivity extends Activity implements
                 dialogUtil.show();
                 break;
             case R.id.ivFunction:
-                PopupWindowUtil.getInstance(SwcameraStreamingActivity.this).showWindow(ivFunction);
-                PopupWindowUtil.getInstance(SwcameraStreamingActivity.this).setOnTuchCalBack(new PopupWindowUtil.OnTuchCalBack() {
+                LiveFunctionView.getInstance(SwcameraStreamingActivity.this).showWindow(ivFunction);
+                LiveFunctionView.getInstance(SwcameraStreamingActivity.this).setOnclickCallBack(new LiveFunctionView.OnclickCallBack() {
                     @Override
-                    public void onclickItem(int vId) {
-                        switch (vId) {
-                            case R.id.tvMy://美颜
+                    public void click(View view1, int id) {
+                        switch (id) {
+                            //关闭美颜
+                            case R.id.llCancelMy:
+                                CameraStreamingSetting.FaceBeautySetting fbSetting = camerasetting.getFaceBeautySetting();
+                                //磨皮
+                                fbSetting.beautyLevel = 0 / 100.0f;
+                                //美白
+                                fbSetting.whiten = 0 / 100.0f;
+                                //红润
+                                fbSetting.redden = 0 / 100.0f;
+                                mp = 0;
+                                mb = 0;
+                                hr = 0;
+                                mMediaStreamingManager.updateFaceBeautySetting(fbSetting);
+                                break;
+                            //设置美颜
+                            case R.id.llSetMy:
                                 setMy();
                                 break;
-                            case R.id.tvYy:
-                                showMusic();
+                            //开启闪光
+                            case R.id.llOpenLight:
+                                TextView textView = view1.findViewById(R.id.tvOnOffLine);
+                                if (isLight) {
+                                    mMediaStreamingManager.turnLightOff();
+                                    isLight = false;
+                                    textView.setText("打开闪光灯");
+                                } else {
+                                    mMediaStreamingManager.turnLightOn();
+                                    isLight = true;
+                                    textView.setText("关闭闪光灯");
+                                }
                                 break;
-                            case R.id.tvKg:
-                                ToastUtil.showShort(mContext, "点击了tvKg");
-                                break;
-                            case R.id.tvLp:
-                                ToastUtil.showShort(mContext, "点击了tvLp");
+                            //录屏
+                            case R.id.llScreen:
+
                                 break;
                         }
+                        LiveFunctionView.getInstance(SwcameraStreamingActivity.this).destroy();
                     }
                 });
                 break;
             case R.id.ivChangeCame:
                 changeCamera();
                 break;
-                default:break;
+            default:
+                break;
         }
     }
 
-    private void showMusic(){
-        List<String>test = new ArrayList<>();
-        for (int i = 0; i < 20; i++) {
-            test.add("数据");
-        }
-        BottomDialogUtil dialogUtil = new BottomDialogUtil(mContext,R.layout.dialog_music,1.5) {
-            @Override
-            public void convert(View holder) {
-                RecyclerView recycleGoods = holder.findViewById(R.id.recycle_music);
-                recycleGoods.setLayoutManager(new LinearLayoutManager(mContext));
-                RecyclerAdapter adapter = new RecyclerAdapter<String>(mContext,test,R.layout.item_live_music) {
-                    @Override
-                    public void convert(Context mContext, BaseRecyclerHolder holder, String o) {
-
-                    }
-                };
-                recycleGoods.setAdapter(adapter);
-            }
-        };
-        dialogUtil.show();
-    }
+    private boolean isLight = false;//闪光灯打开标志
 
     private int mp = 0;//磨皮
     private int mb = 0;//美白
@@ -781,7 +797,9 @@ public class SwcameraStreamingActivity extends Activity implements
                         dialogUtil.des();
                     }
                 });
-                holder.setText(R.id.tv_tips, String.valueOf(chronometer.getBase()));
+
+                holder.setText(R.id.tv_tips, "你已直播时长："+DataUtil.formatMiss(miss));
+                holder.setText(R.id.tvPersonNum,"当前人数已到达："+dzNum+"人");
             }
         };
         dialogUtil.show(R.layout.dialog_tip);
@@ -796,7 +814,7 @@ public class SwcameraStreamingActivity extends Activity implements
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        PopupWindowUtil.getInstance(SwcameraStreamingActivity.this).destroy();
+        LiveFunctionView.getInstance(SwcameraStreamingActivity.this).destroy();
     }
 
     @Override
@@ -804,9 +822,8 @@ public class SwcameraStreamingActivity extends Activity implements
         super.onPause();
         // You must invoke pause here.
         mMediaStreamingManager.pause();
+        //mediaPlayer.pause();
     }
-
-
 
 
     @Override
@@ -819,7 +836,7 @@ public class SwcameraStreamingActivity extends Activity implements
                 Log.e(TAG, "READY");
                 //初始化成功
                 initStatus = true;
-                if (!isStart){
+                if (!isStart) {
                     setNotifyUi(new LiveComment(Contents.HY_SERVER, "跳跳直播", Contents.appLogo, "正在连接..."));
                 }
                 break;
@@ -829,26 +846,37 @@ public class SwcameraStreamingActivity extends Activity implements
                 break;
             case STREAMING:
                 Log.e(TAG, "推流中");
-                if (!isStart){
+                if (!isStart) {
                     setNotifyUi(new LiveComment(Contents.HY_SERVER, "跳跳直播", Contents.appLogo, "跳跳已万事具备，只欠您的表演,开始吧！"));
+                    //开始计时
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            chronometer.setBase(SystemClock.elapsedRealtime());
+                            int hour = (int) ((SystemClock.elapsedRealtime() - chronometer.getBase()) / 1000 / 60);
+                            chronometer.setFormat("0" + String.valueOf(hour) + ":%s");
+                            chronometer.start();
+
+                            chronometer.setOnChronometerTickListener(new Chronometer.OnChronometerTickListener() {
+
+                                @Override
+                                public void onChronometerTick(Chronometer ch) {
+                                    miss++;
+                                }
+                            });
+                        }
+                    });
+                    isStart = true;
                 }
-                //开始计时
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        chronometer.setBase(SystemClock.elapsedRealtime());
-                        int hour = (int) ((SystemClock.elapsedRealtime() - chronometer.getBase()) / 1000 / 60);
-                        chronometer.setFormat("0" + String.valueOf(hour) + ":%s");
-                        chronometer.start();
-                    }
-                });
                 break;
             case SHUTDOWN:
                 Log.e(TAG, "直播中断");
+                chronometer.stop();
                 setNotifyUi(new LiveComment(Contents.HY_SERVER, "跳跳直播", Contents.appLogo, "跳跳中断..."));
                 break;
             case IOERROR:
                 Log.e(TAG, "网络连接失败");
+                chronometer.stop();
                 setNotifyUi(new LiveComment(Contents.HY_SERVER, "跳跳直播", Contents.appLogo, "网络连接失败..."));
                 break;
             case OPEN_CAMERA_FAIL:
@@ -856,6 +884,7 @@ public class SwcameraStreamingActivity extends Activity implements
                 break;
             case DISCONNECTED:
                 Log.e(TAG, "已经断开连接");
+                chronometer.stop();
                 setNotifyUi(new LiveComment(Contents.HY_SERVER, "跳跳直播", Contents.appLogo, "已经断开连接..."));
                 break;
             case TORCH_INFO:
@@ -950,7 +979,7 @@ public class SwcameraStreamingActivity extends Activity implements
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         if (keyCode == KeyEvent.KEYCODE_BACK
                 && event.getAction() == KeyEvent.ACTION_DOWN) {
-            if (isStart) {//已经开始了
+            if (isStart) { //已经开始了
                 if (dialogUtil != null) {
                     if (dialogUtil.isShow()) {
                         dialogUtil.des();

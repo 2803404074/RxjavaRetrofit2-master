@@ -6,6 +6,9 @@ public class Contents {
     //激光推送的sequence 用来标识一次操作的唯一性(退出登录时根据此参数删除别名)
     public static final int SEQUENCE = 200;
 
+    //环信登录密码，固定
+    public final static String HY_PASS = "com.dabangvr.hy.pass";
+
     //环信消息类型
     //内部消息
     public final static String appLogo = "http://image.vrzbgw.com/upload/20190522/174149610e4144.png";
@@ -17,4 +20,5 @@ public class Contents {
     public final static int HY_DM = 1;//弹幕
     public final static int HY_DS = 2;//打赏
     public final static int HY_ORDER = 3;//下单
+    public final static int HY_DZ = 4;//下单
 }

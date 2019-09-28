@@ -24,20 +24,27 @@
         android:paddingHorizontal="@dimen/dp_5"
         android:layout_toRightOf="@+id/iv_content">
         <TextView
+            android:id="@+id/tvTitle"
             android:layout_width="wrap_content"
             android:layout_height="0dp"
             android:layout_weight="1"
             android:gravity="center"
+            android:lines="1"
+            android:ellipsize="end"
             android:text="标题：我是小仙女？？"
             android:textSize="@dimen/sp_18"/>
         <TextView
+            android:id="@+id/tvJj"
             android:layout_width="wrap_content"
             android:layout_height="0dp"
             android:layout_weight="1"
             android:gravity="center"
+            android:lines="1"
+            android:ellipsize="end"
             android:text="简介：欢迎来到小仙女的直播间"
             android:textSize="@dimen/sp_16"/>
         <TextView
+            android:id="@+id/tvNoticeTime"
             android:layout_width="wrap_content"
             android:layout_height="0dp"
             android:layout_weight="1"

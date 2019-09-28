@@ -40,4 +40,13 @@ public class DataUtil {
         }
         return list;
     }
+
+
+    // 将秒转化成小时分钟秒
+    public static String formatMiss(int miss){
+        String hh=miss/3600>9?miss/3600+"":"0"+miss/3600;
+        String  mm=(miss % 3600)/60>9?(miss % 3600)/60+"":"0"+(miss % 3600)/60;
+        String ss=(miss % 3600) % 60>9?(miss % 3600) % 60+"":"0"+(miss % 3600) % 60;
+        return hh+":"+mm+":"+ss;
+    }
 }

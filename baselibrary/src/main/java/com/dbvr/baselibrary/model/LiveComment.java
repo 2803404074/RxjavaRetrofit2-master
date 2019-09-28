@@ -5,6 +5,7 @@ package com.dbvr.baselibrary.model;
  */
 public class LiveComment {
     private int msgTag;//标签
+    private int dzNum;
     private String userName;//打赏的用户名
     private String headUrl;//打赏的用户的头像
 
@@ -23,12 +24,21 @@ public class LiveComment {
     public String toString() {
         return "LiveComment{" +
                 "msgTag=" + msgTag +
+                ", dzNum=" + dzNum +
                 ", userName='" + userName + '\'' +
                 ", headUrl='" + headUrl + '\'' +
                 ", msgComment='" + msgComment + '\'' +
                 ", msgDsComment=" + msgDsComment +
                 ", msgOrder=" + msgOrder +
                 '}';
+    }
+
+    public int getDzNum() {
+        return dzNum;
+    }
+
+    public void setDzNum(int dzNum) {
+        this.dzNum = dzNum;
     }
 
     public LiveComment() {

@@ -4,6 +4,8 @@ package com.dbvr.retrofitlibrary.utils;
 import android.content.Context;
 
 import androidx.annotation.NonNull;
+
+import com.dbvr.baselibrary.utils.SPUtils;
 import com.dbvr.retrofitlibrary.bean.Constans;
 import com.dbvr.retrofitlibrary.service.ApiUrl;
 import com.jakewharton.retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;

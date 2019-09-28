@@ -73,7 +73,9 @@ public class LoginActivity extends BaseActivity {
             public void onSuccess(UserMess result) {
                 SPUtils.instance(getContext()).putObj(Contents.USER,result);
                 SPUtils.instance(getContext()).put("token",result.getToken());
-                startActivity(new Intent(getContext(),MainActivity.class));
+
+
+                startActivity(new Intent(getContext(),WellComePageActivity.class));
                 finish();
             }
             @Override

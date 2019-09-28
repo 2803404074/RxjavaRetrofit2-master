@@ -34,4 +34,16 @@ public class Constans {
     //环信创建房间
     public final static String HY_CREATE_ROOM = "api/easemob/createChatRoom";
 
+    //直播任务
+    public final static String MyTask = "api/pili/myLiveTaskList";
+
+    //预告列表
+    public final static String MyNoticeList = "api/pili/myLiveNoticeList";
+
+    //新增预告
+    public final static String AddNotice = "api/pili/addLiveNotice";
+
+    //音乐列表
+    public final static String MusicList = "/api/pili/getMusicList";
+
 }
